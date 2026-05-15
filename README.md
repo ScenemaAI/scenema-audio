@@ -34,25 +34,23 @@ Runs on any NVIDIA GPU with 16 GB+ VRAM. The default configuration uses INT8 aud
 python generate.py output.wav
 
 # Or with curl
-curl -X POST http://localhost:8000/generate \
+curl -s -X POST http://localhost:8000/generate \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "<speak voice=\"A warm, clear male voice with a slight British accent. Measured, thoughtful pacing.\" gender=\"male\">The old lighthouse had stood on the cliff for over a century, its beam cutting through the fog like a blade of light.</speak>",
     "seed": 42
-  }' \
-  --output output.wav
+  }' | grep -oP '"audio":"\K[^"]+' | base64 -d > output.wav
 ```
 
 ### Voice Design (Preview a Voice)
 
 ```bash
-curl -X POST http://localhost:8000/generate \
+curl -s -X POST http://localhost:8000/generate \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "<speak voice=\"A young woman with a smoky, low register voice. Intimate, confessional tone.\" gender=\"female\">The city never really sleeps. It just closes its eyes and pretends for a while.</speak>",
     "mode": "voice_design"
-  }' \
-  --output voice_preview.wav
+  }' | grep -oP '"audio":"\K[^"]+' | base64 -d > voice_preview.wav
 ```
 
 ### Zero-Shot Voice Cloning
@@ -60,14 +58,13 @@ curl -X POST http://localhost:8000/generate \
 Provide 10-20 seconds of reference audio with some emotional variability. The model generates expressive speech from the prompt, then transfers the reference voice's identity onto the performance. References that contain a range of pitch and intonation produce significantly better identity transfer than flat, monotone clips.
 
 ```bash
-curl -X POST http://localhost:8000/generate \
+curl -s -X POST http://localhost:8000/generate \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "<speak voice=\"Gravelly male voice, fast talking, rough.\" gender=\"male\"><action>He completely loses it, shouting</action>What are you waiting for?!</speak>",
     "reference_voice_url": "https://example.com/calm-reference.wav",
     "seed": 42
-  }' \
-  --output cloned_angry.wav
+  }' | grep -oP '"audio":"\K[^"]+' | base64 -d > cloned_angry.wav
 ```
 
 Any voice can perform any emotion, even if that voice has never been recorded in that emotional state. The reference provides identity. The performance comes from the prompt.
